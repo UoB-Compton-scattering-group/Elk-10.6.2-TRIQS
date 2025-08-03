@@ -5,8 +5,9 @@ Interface:
 - renamed the hacked gwscrho.f90 to dftdmftrho.f90 and removed all sc-gw content.  
 
 Developer TO DO:
-- Test tasks 803, 808 and 809.
-- merge dmft specific routines into dftdmftrho.f90.
+- Test tasks 803 (outputs seem reasonable for Test 36), 808 (Runs fine) and 809 (Runs fine).
+  Need to test with TRIQS.
+- merge dmft specific routines into gndstate.f90.
 
 elk-10.6.2
 -Eddie Harris-Lee fixed a problem with the time-dependent excited charge for the

@@ -21,17 +21,17 @@ complex(8) evecsv(nstsv,nstsv),d(nstsv,nstsv),a(nstsv,nstsv)
 complex(8), allocatable :: se(:,:,:)
 ! external functions
 complex(8), external :: gwtails
-! read the self-energy from file
-allocate(se(nstsv,nstsv,0:nwfm))
-call getgwsefm(ik,se)
+!adnj edit - sets the density matrix from dmft output
 ! zero the density matrix
 d(1:nstsv,1:nstsv)=0.d0
-!adnj edit - sets the density matrix from dmft output
 if((task.eq.808).or.(task.eq.809)) then
   d(:,:)=dmatkdmft(:,:,ik)
   goto 10
 end if
 ! end edit
+! read the self-energy from file
+allocate(se(nstsv,nstsv,0:nwfm))
+call getgwsefm(ik,se)
 ! loop over fermionic Matsubara frequencies
 call holdthd(nwfm+1,nthd)
 !$OMP PARALLEL DO DEFAULT(SHARED) &

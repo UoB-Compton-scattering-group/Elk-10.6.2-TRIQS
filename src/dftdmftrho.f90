@@ -12,7 +12,7 @@ implicit none
 ! local variables
 logical exist
 integer ik,nthd
-integer nmix,nwork
+integer nmix,nwork,lp
 real(8) dv
 ! allocatable arrays
 real(8), allocatable :: vmt(:,:),vir(:)
@@ -154,11 +154,31 @@ do iscl=1,maxscl
   !  write(60,'("GW Fermi energy        : ",G18.10)') efermi
   !  flush(60)
   !end if
+! compute the DFT+DMFT density matrices and write the natural orbitals and occupation
+! numbers to EVECSV.OUT and OCCSV.OUT, respectively
+  call holdthd(nkpt/np_mpi,nthd)
+  !$OMP PARALLEL DO DEFAULT(SHARED) &
+  !$OMP SCHEDULE(DYNAMIC) &
+  !$OMP NUM_THREADS(nthd)
+  do ik=1,nkpt
+  ! distribute among MPI processes
+    if (mod(ik-1,np_mpi) /= lp_mpi) cycle
+    call gwdmatk(ik)
+  end do
+  !$OMP END PARALLEL DO
+  call freethd(nthd)
+  ! broadcast occupation number array to every MPI process
+  if (np_mpi > 1) then
+    do ik=1,nkpt
+      lp=mod(ik-1,np_mpi)
+      call mpi_bcast(occsv(:,ik),nstsv,mpi_double_precision,lp,mpicom,ierror)
+    end do
+  end if
 ! determine the density and magnetisation
-  call gwrhomag
+  call rhomag
   !if(task.eq.808) then
 ! compute the Kohn-Sham potentials and magnetic fields
-    call potks(.true.)
+  call potks(.true.)
   !else
 ! invert the Kohn-Sham equations to find V_s and B_s
     !call ksinvert

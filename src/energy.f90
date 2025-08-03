@@ -180,7 +180,7 @@ end do
 if(task.eq.808) then
   do ik=1,nkpt
     do ist=1,nstsv
-      evalsum=evalsum+w*dmatkdmft(ist,ist,ik)*occmax*evalsv(ist,ik)
+      evalsum=evalsum+wkpt(ik)*dmatkdmft(ist,ist,ik)*occmax*evalsv(ist,ik)
     end do
   end do
 else
