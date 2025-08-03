@@ -26,6 +26,12 @@ allocate(se(nstsv,nstsv,0:nwfm))
 call getgwsefm(ik,se)
 ! zero the density matrix
 d(1:nstsv,1:nstsv)=0.d0
+!adnj edit - sets the density matrix from dmft output
+if((task.eq.808).or.(task.eq.809)) then
+  d(:,:)=dmatkdmft(:,:,ik)
+  goto 10
+end if
+! end edit
 ! loop over fermionic Matsubara frequencies
 call holdthd(nwfm+1,nthd)
 !$OMP PARALLEL DO DEFAULT(SHARED) &
@@ -83,6 +89,7 @@ do ist=1,nstsv
   end do
   d(ist,ist)=dble(d(ist,ist))
 end do
+10 continue ! adnj edit - jump here to diagonalise the dmft dmat
 ! diagonalise the density matrix for the natural orbitals and occupation numbers
 call eveqnzh(nstsv,nstsv,d,occsv(:,ik))
 occsv(1:nstsv,ik)=occsv(1:nstsv,ik)*occmax

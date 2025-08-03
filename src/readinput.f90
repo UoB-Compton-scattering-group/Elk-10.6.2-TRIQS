@@ -405,6 +405,11 @@ tphnat=.false.
 ecutthc=0.01d0
 tbdipu=.false.
 bdipscf=1.d0
+! adnj edit - projector variables
+norb=0
+cubic=.true.
+wanind=.false.
+!end edit
 
 !--------------------------!
 !     read from elk.in     !
@@ -2235,6 +2240,42 @@ case('tbdipu')
   read(50,*,err=20) tbdipu
 case('bdipscf')
   read(50,*,err=20) bdipscf
+!adnj edit - projector inputs
+case('wanproj')
+! number of projectors
+  read(50,*,err=20) norb
+  if(norb.le.0) then
+    write(*,*) 'Invalid number of projectors, norb = ', norb
+    write(*,*) 'Need to input norb > 0 '
+  end if
+!deallocate any previous uses
+  if(allocated(orb)) deallocate(orb)
+  if(allocated(rorblm)) deallocate(rorblm)
+! array containing species, atom and angular l info
+  allocate(orb(norb,3))
+! lm indices used in the projector routine
+  allocate(rorblm(norb,(lmaxo+1)**2))
+! looping over each input projector info
+  do i=1,norb
+    read(50,*,err=20) orb(i,:)
+! make sure that the reduced value is less than 2l+1
+    if (mp_mpi) then
+      if(orb(i,3).gt.(2*orb(i,2)+1)) then
+        write(*,*) 'Invalid number of reduced lm indices for projector ', i
+        stop
+      end if
+    end if
+    read(50,*,err=20) rorblm(i,1:orb(i,3))
+  end do
+! correlated energy window limits
+  read(50,*,err=20) emincor, emaxcor
+!which basis to output projector in
+case('cubic')
+  read(50,*,err=20) cubic
+!Using band indices for correlated window
+case('wanind')
+  read(50,*,err=20) wanind
+!end edit
 case('')
   goto 10
 case default

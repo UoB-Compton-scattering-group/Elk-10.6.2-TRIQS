@@ -1299,5 +1299,14 @@ integer notelns
 ! notes to include in INFO.OUT
 character(256), allocatable :: notes(:)
 
+!adnj edit - global dmft variables
+!--------------------------------!
+!     DMFT (TRIQS) variables     !
+!--------------------------------!
+!correlated energy from DFMT to be used for adjusted total energy
+real(8) :: engydmft=0.d0
+!dmft density matrix array
+complex, allocatable :: dmatkdmft(:,:,:)
+
 end module
 

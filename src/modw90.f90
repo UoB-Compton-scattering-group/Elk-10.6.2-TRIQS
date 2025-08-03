@@ -38,5 +38,26 @@ integer, allocatable :: nncell(:,:,:)
 ! enable real-space wavefunction plotting
 logical wrtunk
 
+! adnj edit - add projector variables
+!--------------------------------!
+!  Wannier Projector variables   !
+!--------------------------------!
+!number of desired projectors 
+integer norb
+!integer array containing the input species, atom and angular l number
+!for each desired projector
+integer, allocatable :: orb(:,:)
+!reduced lm indices used in the wannier porjectors
+integer, allocatable :: rorblm(:,:)
+!the min and max correlated energy window limits
+real(8) emincor, emaxcor
+!logical to determine if projector is outputted in lm or irreducible lm basis
+logical cubic
+!logical to determine if band indices are going to be used for correlated window
+logical wanind
+! index to bands
+integer, allocatable :: idxwan(:,:)
+!end edit
+
 end module
 

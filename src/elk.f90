@@ -99,7 +99,7 @@ do itask=1,ntasks
     if (all(task /= [0,1,2,3,5,15,16,28,29,61,62,63,110,120,121,125,135,136, &
      162,170,180,185,200,201,202,205,208,209,240,241,270,271,300,320,330,331, &
      350,351,352,371,372,373,380,390,420,421,440,460,461,462,463,471,478,600, &
-     601,610,620,640,680,700,701,720])) then
+     601,610,620,640,680,700,701,720,804,805,806,807,808,809,820])) then !adnj edit
       write(*,'("Info(elk): MPI process ",I6," idle for task ",I6)') lp_mpi,task
       goto 20
     end if
@@ -277,6 +277,20 @@ do itask=1,ntasks
     call potuplot
   case(771,772,773)
     call maguplot
+! adnj edit - projection and interface routines
+! calculate the Wannier projectors
+! output the band characters for band structure and PDOS calculations
+  case(802,803)
+    call writebandchar
+  case(804,805,806,807,820)
+    call writewan
+! update elk with DMFT density matrix (for traditional fcsc DFT+DMFT)
+  case(808)
+    call dftdmftrho
+! generate the density matrix from the DMFT density matrix
+  case(809)
+    call gwdmat
+! end edit
   case default
     write(*,*)
     write(*,'("Error(elk): task not defined : ",I8)') task

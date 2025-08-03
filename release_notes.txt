@@ -1,3 +1,13 @@
+Interface:
+- removed spin coupled flag spcpl from projector subroutines and replaced it with 
+  the combination of ncmag and spinorb (as spcpl = ncmag .or. spinorb).
+- updated the previously name wrmt to wr2mt.
+- renamed the hacked gwscrho.f90 to dftdmftrho.f90 and removed all sc-gw content.  
+
+Developer TO DO:
+- Test tasks 803, 808 and 809.
+- merge dmft specific routines into dftdmftrho.f90.
+
 elk-10.6.2
 -Eddie Harris-Lee fixed a problem with the time-dependent excited charge for the
  spin-polarised case

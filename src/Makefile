@@ -215,9 +215,16 @@ SRC_W90 = \
  initw90.f90 writew90.f90 writew90win.f90 writew90eig.f90 setupw90.f90 \
  writew90mmn.f90 writew90spn.f90 writew90amn.f90 writew90unk.f90
 
+ #adnj edit - dmft interface routines
+SRC_DMFT = \
+ writewan.f90 wanproj.f90 wanprojk.f90 wanolp.f90 wannorm.f90 su2lm.f90\
+ wanchg.f90 wangloc.f90 getdmatdmft.f90 genwfsvpwan.f90 writeband.f90\
+ writewanproj.f90 writewanchg.f90 writewangloc.f90 writebandchar.f90\
+ getbandchar.f90 dftdmftrho.f90
+
 SRC = $(SRC_modules) $(SRC_FFT) $(SRC_elk) $(SRC_main) $(SRC_phonon) \
  $(SRC_XC) $(SRC_DFTU) $(SRC_RDMFT) $(SRC_GW) $(SRC_TDDFT) \
- $(SRC_ULR) $(SRC_W90) $(SRC_BOG) $(SRC_TDHFC)
+ $(SRC_ULR) $(SRC_W90) $(SRC_BOG) $(SRC_TDHFC) $(SRC_DMFT)
 
 OBJ = $(SRC:.f90=.o)
 EXE = elk

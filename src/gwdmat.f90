@@ -21,8 +21,15 @@ call readfermi
 do ik=1,nkpt
   call getevalsv(filext,ik,vkl(:,ik),evalsv(:,ik))
 end do
+! adnj edit - read dmft dmat, do not need to determine new fermi level in this case
+if((task.eq.808).or.(task.eq.809)) then
+  call occupy
+  call getdmatdmft
+else
 ! determine the GW Fermi energy
-call gwefermi
+  call gwefermi
+endif
+!end edit
 ! compute the GW density matrices and write the natural orbitals and occupation
 ! numbers to EVECSV.OUT and OCCSV.OUT, respectively
 call holdthd(nkpt/np_mpi,nthd)
