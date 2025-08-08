@@ -409,6 +409,7 @@ bdipscf=1.d0
 norb=0
 cubic=.true.
 wanind=.false.
+without_dmftdmat=.false.
 !end edit
 
 !--------------------------!
@@ -2275,6 +2276,9 @@ case('cubic')
 !Using band indices for correlated window
 case('wanind')
   read(50,*,err=20) wanind
+! run without reading the external DMFT DMAT file
+case('without_dmftdmat')
+  read(50,*,err=20) without_dmftdmat
 !end edit
 case('')
   goto 10

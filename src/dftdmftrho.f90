@@ -15,10 +15,7 @@ integer ik,nthd
 integer nmix,nwork,lp
 real(8) dv
 ! allocatable arrays
-real(8), allocatable :: vmt(:,:),vir(:)
-real(8), allocatable :: bmt(:,:,:),bir(:,:)
 real(8), allocatable :: work(:)
-complex(8), allocatable :: se(:,:,:)
 ! initialise universal variables
 call init0
 call init1
@@ -29,13 +26,6 @@ call readstate
 call genvsig
 ! read the Fermi energy
 call readfermi
-! zero the exchange-correlation potential and magnetic field
-vxcmt(:,:)=0.d0
-vxcir(:)=0.d0
-if (spinpol) then
-  bxcmt(:,:,:)=0.d0
-  bxcir(:,:)=0.d0
-end if
 ! re-calculate the ground-state
 call gencore
 call linengy
@@ -43,19 +33,8 @@ call genapwlofr
 call gensocfr
 call genevfsv
 call occupy
-if(task.eq.808) then
-  !read in dmft density matrix
-  call getdmatdmft
-  !only do one loop
-  maxscl=1
-endif
-allocate(vmt(npcmtmax,natmtot),vir(ngtot))
-if (spinpol) then
-  allocate(bmt(npcmtmax,natmtot,ndmag),bir(ngtot,ndmag))
-end if
+
 if (mp_mpi) then
-! adnj edit - if DFT+DMFT
-!  if(task.eq.808) then
 ! check if interface has been generated from a potential previous loop 
   inquire(file="DMFT_INFO.OUT", exist=exist)
 ! append DMFT_INFO.OUT
@@ -65,11 +44,6 @@ if (mp_mpi) then
   else
     open(60,file='DMFT_INFO.OUT',form='FORMATTED')
   end if
-!  else
-!! open GW_INFO.OUT file
-!    open(60,file='GW_INFO.OUT',form='FORMATTED')
-!  endif
-! end adnj edit
 ! open FERMIDOS.OUT
   open(62,file='FERMIDOS.OUT',form='FORMATTED')
 ! open MOMENT.OUT if required
@@ -80,210 +54,128 @@ if (mp_mpi) then
   open(65,file='RMSDVS.OUT',form='FORMATTED')
 ! open MOMENTM.OUT
   if (spinpol) open(68,file='MOMENTM.OUT',form='FORMATTED')
-!! open RESIDUAL.OUT
-!  open(69,file='RESIDUAL.OUT',form='FORMATTED')
-!! write out general information to GW_INFO.OUT
-!  call writeigw(60)
-  write(60,*)
-  write(60,'("+------------------------------+")')
-  write(60,'("| Self-consistent loop started |")')
-  write(60,'("+------------------------------+")')
+  call writebox(60,"Calculating DFT+DMFT density")
 end if
 ! size of mixing vector
-nmix=size(vsbs)
+nmix=size(vmixer)
 ! determine the size of the mixer work array
 nwork=-1
-call mixerifc(mixtype,nmix,vsbs,dv,nwork,vsbs)
+call mixerifc(mixtype,nmix,vmixer,dv,nwork,vmixer)
 allocate(work(nwork))
 ! initialise the mixer
 iscl=0
-call mixerifc(mixtype,nmix,vsbs,dv,nwork,work)
-! set the stop signal to .false.
-tstop=.false.
-! set last self-consistent loop flag
-tlast=.false.
-do iscl=1,maxscl
-  if (mp_mpi) then
-    write(60,*)
-    write(60,'("+--------------------+")')
-    write(60,'("| Loop number : ",I4," |")') iscl
-    write(60,'("+--------------------+")')
-  end if
-! adnj edit - do these subroutines for gw
-!  if(task.eq.630) then
-!    call genpmat
-!    call epsinv
-!! compute the matrix elements of -V_xc and -B_xc
-!    call gwlocal(vmt,vir,bmt,bir)
-!! synchronise MPI processes
-!    call mpi_barrier(mpicom,ierror)
-!    if (mp_mpi) write(*,*)
-!! loop over reduced k-point set
-!    call holdthd(nkpt/np_mpi,nthd)
-!!$OMP PARALLEL DEFAULT(SHARED) &
-!!$OMP PRIVATE(se) &
-!!$OMP NUM_THREADS(nthd)
-!    allocate(se(nstsv,nstsv,0:nwfm))
-!!$OMP DO
-!    do ik=1,nkpt
-!! distribute among MPI processes
-!      if (mod(ik-1,np_mpi).ne.lp_mpi) cycle
-!!$OMP CRITICAL(gwscrho_)
-!      write(*,'("Info(gwscrho): ",I6," of ",I6," k-points")') ik,nkpt
-!!$OMP END CRITICAL(gwscrho_)
-!! determine the self-energy at the fermionic frequencies for current k-point
-!      call gwsefmk(ik,vmt,vir,bmt,bir,se)
-!! write the self-energy to file
-!      call putgwsefm(ik,se)
-!    end do
-!!$OMP END DO
-!    deallocate(se)
-!!$OMP END PARALLEL
-!    call freethd(nthd)
-! synchronise MPI processes
-!    call mpi_barrier(mpicom,ierror)
-!  endif
-! end edit
-  if (mp_mpi) then
-    write(60,*)
-    write(60,'("DFT Kohn-Sham Fermi energy : ",G18.10)') efermi
-  end if
-! determine the GW Fermi energy
-  !if(task.ne.808) call gwefermi !adnj edit not needed here for DFT+DMFT
-  !if (mp_mpi) then
-  !  write(60,'("GW Fermi energy        : ",G18.10)') efermi
-  !  flush(60)
-  !end if
+call mixerifc(mixtype,nmix,vmixer,dv,nwork,work)
+iscl=1
+if (mp_mpi) then
+  write(60,*)
+  write(60,'("Previous Kohn-Sham Fermi energy : ",G18.10)') efermi
+end if
+
+!read in dmft density matrix
+call getdmatdmft
 ! compute the DFT+DMFT density matrices and write the natural orbitals and occupation
 ! numbers to EVECSV.OUT and OCCSV.OUT, respectively
-  call holdthd(nkpt/np_mpi,nthd)
-  !$OMP PARALLEL DO DEFAULT(SHARED) &
-  !$OMP SCHEDULE(DYNAMIC) &
-  !$OMP NUM_THREADS(nthd)
+call holdthd(nkpt/np_mpi,nthd)
+!$OMP PARALLEL DO DEFAULT(SHARED) &
+!$OMP SCHEDULE(DYNAMIC) &
+!$OMP NUM_THREADS(nthd)
+do ik=1,nkpt
+! distribute among MPI processes
+  if (mod(ik-1,np_mpi) /= lp_mpi) cycle
+  call gwdmatk(ik)
+end do
+!$OMP END PARALLEL DO
+call freethd(nthd)
+! broadcast occupation number array to every MPI process
+if (np_mpi > 1) then
   do ik=1,nkpt
-  ! distribute among MPI processes
-    if (mod(ik-1,np_mpi) /= lp_mpi) cycle
-    call gwdmatk(ik)
+    lp=mod(ik-1,np_mpi)
+    call mpi_bcast(occsv(:,ik),nstsv,mpi_double_precision,lp,mpicom,ierror)
   end do
-  !$OMP END PARALLEL DO
-  call freethd(nthd)
-  ! broadcast occupation number array to every MPI process
-  if (np_mpi > 1) then
-    do ik=1,nkpt
-      lp=mod(ik-1,np_mpi)
-      call mpi_bcast(occsv(:,ik),nstsv,mpi_double_precision,lp,mpicom,ierror)
-    end do
-  end if
-! determine the density and magnetisation
-  call rhomag
-  !if(task.eq.808) then
-! compute the Kohn-Sham potentials and magnetic fields
-  call potks(.true.)
-  !else
-! invert the Kohn-Sham equations to find V_s and B_s
-    !call ksinvert
-  !end if
-! end edit
-! mix the old effective potential and field with the new
-  call mixerifc(mixtype,nmix,vsbs,dv,nwork,work)
+end if
+! determine the DFT+DMFT density and magnetisation
+call rhomag
+! compute the Kohn-Sham potential and magnetic field before potential mixing
+if (.not.mixrho) call potks(.true.)
+! mix the old density/magnetisation or potential/field with the new
+call mixerifc(mixtype,nmix,vmixer,dv,nwork,work)
+! compute the Kohn-Sham potential and magnetic field after density mixing
+if (mixrho) call potks(.true.)
 ! Fourier transform Kohn-Sham potential to G-space
-  call genvsig
-! adnj edit
-  !if(task.ne.630) then
+call genvsig
 ! compute the energy components
-  call energy
+call energy
 ! calculate the Kohn-Sham energy eigenvectors, eigenvalues
 ! and occupations from the updated DFT+DMFT density
-  call genapwlofr
-  call gensocfr
-  call genevfsv
-  call occupy
-  !end if
-! end edit
-  if (mp_mpi) then
+call genapwlofr
+call gensocfr
+call genevfsv
+call occupy
+
+if (mp_mpi) then
 ! write the Kohn-Sham occupation numbers to file
-    do ik=1,nkpt
-      call putoccsv(filext,ik,occsv(:,ik))
-    end do
-    call writeeval
-    call writefermi
+  do ik=1,nkpt
+    call putoccsv(filext,ik,occsv(:,ik))
+  end do
+  call writeeval
+  call writefermi
 ! write STATE.OUT file
-    call writestate
+  call writestate
 ! adnj edit - output DMFT energy components. Note that the total
 !             energy will not be used as a convergence criteria
-    !if(task.ne.630) 
-    call writeengy(60)
+  !if(task.ne.630) 
+  call writeengy(60)
 ! end edit
-    write(60,*)
-    write(60,'("Density of states at Fermi energy : ",G18.10)') fermidos
-    write(60,'(" (states/Hartree/unit cell)")')
-    write(60,*)
-    write(60,'("Estimated indirect band gap : ",G18.10)') bandgap(1)
-    write(60,'(" from k-point ",I6," to k-point ",I6)') ikgap(1),ikgap(2)
-    write(60,'("Estimated direct band gap   : ",G18.10)') bandgap(2)
-    write(60,'(" at k-point ",I6)') ikgap(3)
+  write(60,*)
+  write(60,'("Density of states at Fermi energy : ",G18.10)') fermidos
+  write(60,'(" (states/Hartree/unit cell)")')
+  write(60,*)
+  write(60,'("Estimated indirect band gap : ",G18.10)') bandgap(1)
+  write(60,'(" from k-point ",I6," to k-point ",I6)') ikgap(1),ikgap(2)
+  write(60,'("Estimated direct band gap   : ",G18.10)') bandgap(2)
+  write(60,'(" at k-point ",I6)') ikgap(3)
 ! output charges and moments
-    call writechg(60)
-    if (spinpol) call writemom(60)
-    write(60,*)
-    write(60,'("Magnitude of residual : ",G18.10)') resoep
-    flush(60)
+  call writechg(60)
+  if (spinpol) call writemom(60)
+  flush(60)
 ! write DOS at Fermi energy to FERMIDOS.OUT
-    write(62,'(G18.10)') fermidos
-    flush(62)
-    if (spinpol) then
+  write(62,'(G18.10)') fermidos
+  flush(62)
+  if (spinpol) then
 ! write total moment to MOMENT.OUT
-      write(63,'(3G18.10)') momtot(1:ndmag)
-      flush(63)
+    write(63,'(3G18.10)') momtot(1:ndmag)
+    flush(63)
 ! write total moment magnitude to MOMENTM.OUT
-      write(68,'(G18.10)') momtotm
-      flush(68)
-    end if
+    write(68,'(G18.10)') momtotm
+    flush(68)
+  end if
 ! write estimated Kohn-Sham indirect band gap
-    write(64,'(G22.12)') bandgap(1)
-    flush(64)
-!! write residual to RESIDUAL.OUT
-!    write(69,'(G18.10)') resoep
-!    flush(69)
-  end if
-! exit self-consistent loop if required
-  if (tlast) goto 10
+  write(64,'(G22.12)') bandgap(1)
+  flush(64)
+end if
 ! check for convergence
-  if (iscl.ge.2) then
-    if (mp_mpi) then
-      write(60,*)
-      write(60,'("RMS change in Kohn-Sham potential (target) : ",G18.10," (",&
-       &G18.10,")")') dv,epspot
-      flush(60)
-      write(65,'(G18.10)') dv
-      flush(65)
-    end if
-    if (dv.lt.epspot) then
-      if (mp_mpi) then
-        write(60,*)
-        write(60,'("Convergence targets achieved")')
-      end if
-      tlast=.true.
-    end if
+if (mp_mpi) then
+  write(60,*)
+  write(60,'("RMS change in Kohn-Sham potential (target) : ",G18.10," (",&
+    &G18.10,")")') dv,epspot
+  flush(60)
+  write(65,'(G18.10)') dv
+  flush(65)
+end if
+if (dv.lt.epspot) then
+  if (mp_mpi) then
+    write(60,*)
+    write(60,'("Convergence targets achieved")')
   end if
-! check for STOP file
-  call checkstop
-  if (tstop) tlast=.true.
-! broadcast tlast from master process to all other processes
-  call mpi_bcast(tlast,1,mpi_logical,0,mpicom,ierror)
+end if
 ! reset the OpenMP thread variables
-  call omp_reset
-! end the self-consistent loop
-end do
-10 continue
+call omp_reset
+
 ! synchronise MPI processes
 call mpi_barrier(mpicom,ierror)
 if (mp_mpi) then
-  write(60,*)
-  write(60,'("+------------------------------+")')
-  write(60,'("| Self-consistent loop stopped |")')
-  write(60,'("+------------------------------+")')
-! close the GW_INFO.OUT file
+  call writebox(60,"Calculated DFT+DMFT density")
+! close the DMFT_INFO.OUT file
   close(60)
 ! close the FERMIDOS.OUT file
   close(62)
@@ -295,10 +187,6 @@ if (mp_mpi) then
   close(64)
 ! close the RMSDVS.OUT file
   close(65)
-! close the RESIDUAL.OUT file
-  close(69)
 end if
-deallocate(vmt,vir)
-if (spinpol) deallocate(bmt,bir)
 end subroutine
 

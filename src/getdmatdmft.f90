@@ -16,6 +16,19 @@ integer nst, ist, jst, nspin
 real(8) mu, beta
 real(8), allocatable :: rd(:), id(:)
 
+!allocate the dmft density matrix
+allocate(dmatkdmft(nstsv,nstsv,nkpt))
+!zero density matrix
+dmatkdmft(:,:,:)=0.d0
+!set the diagonal to the KS/natural orbital occupancy values
+do ist=1,nstsv
+  !new occsv will be scaled by occmax after diagonalisation (in gwdmatk.f90)
+  dmatkdmft(ist,ist,:)=occsv(ist,:)/occmax
+enddo
+
+! return if testing without reading external file
+if (without_dmftdmat) return
+
 !The density matrix is a mixture of the spinor wavefunctions (w.r.t nstsv) for spin-orb,
 !therefore this must be accounted for when reading in the density matrix.
 if(spinorb) then
@@ -44,15 +57,6 @@ if (nspin.ne.nspin_) then
   write(*,*)
   stop
 end if
-!allocate the dmft density matrix
-allocate(dmatkdmft(nstsv,nstsv,nkpt))
-!zero density matrix
-dmatkdmft(:,:,:)=0.d0
-!set the diagonal to the KS/natural orbital occupancy values
-do ist=1,nstsv
-  !new occsv will be scaled by occmax after diagonalisation (in gwdmatk.f90)
-  dmatkdmft(ist,ist,:)=occsv(ist,:)/occmax
-enddo
 !read in the density matrix
 do ik=1,nkpt
   do ispn=1,nspin

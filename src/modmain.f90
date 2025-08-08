@@ -1307,6 +1307,8 @@ character(256), allocatable :: notes(:)
 real(8) :: engydmft=0.d0
 !dmft density matrix array
 complex, allocatable :: dmatkdmft(:,:,:)
+!test flag for testing TRIQS->Elk interface routines without reading DMFTDMAT.OUT
+logical :: without_dmftdmat = .false.
 
 end module
 

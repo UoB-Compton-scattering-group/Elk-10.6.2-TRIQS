@@ -3,6 +3,10 @@ Interface:
   the combination of ncmag and spinorb (as spcpl = ncmag .or. spinorb).
 - updated the previously name wrmt to wr2mt.
 - renamed the hacked gwscrho.f90 to dftdmftrho.f90 and removed all sc-gw content.  
+- using vmixer (as in gndstate.f90) in dftdmftrho.f90 so the DFT+DMFT mixing can 
+  be done with the potential or density.
+- added test for the DFT+DMFT eletron density subroutines using the DFT 
+  density matrix. 
 
 Developer TO DO:
 - Test tasks 803 (outputs seem reasonable for Test 36), 808 (Runs fine) and 809 (Runs fine).
