@@ -88,7 +88,7 @@ call freethd(nthd)
 call mpi_barrier(mpicom,ierror)
 deallocate(dmat)
 ! reduce local green's function array from every MPI process
-if (np_mpi.gt.1) then
+if (np_mpi > 1) then
   n=nwplot*ld*nspinor*ld*nspinor*norb*nproj
   call mpi_allreduce(mpi_in_place,gloc,n,mpi_double_complex, &
                      mpi_sum,mpicom,ierror)

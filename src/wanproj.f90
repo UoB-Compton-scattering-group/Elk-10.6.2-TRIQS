@@ -66,7 +66,7 @@ do iorb=1,norb
 ! want to find a proper symmetric matrix (i.e. does not 
 ! include inversion symmetry) which transfroms atom la
 ! to ka. This is for local <-> global coordinate transformation. 
-        if((ka.eq.la).and.(symlatd(lspl).gt.0.d0)) then
+        if((ka == la).and.(symlatd(lspl) > 0.d0)) then
 ! calculate the symmerty matrix in lm basis
           call rotzflm(symlatc(:,:,lspl),l,l,lm1,lm1,lm1,a,z1)
 ! Keep desired array subset 
@@ -92,7 +92,7 @@ call holdthd(nkpt/np_mpi,nthd)
 !$OMP DO
 do ik=1,nkpt
 ! distribute among MPI processes
-  if (mod(ik-1,np_mpi).ne.lp_mpi) cycle
+  if (mod(ik-1,np_mpi) /= lp_mpi) cycle
 !$OMP CRITICAL(wanproj_)
   write(*,'("Info(wanproj): ",I6," of ",I6," k-points")') ik,nkpt
 !$OMP END CRITICAL(wanproj_)
@@ -106,7 +106,7 @@ call freethd(nthd)
 ! synchronise MPI processes
 call mpi_barrier(mpicom,ierror)
 ! reduce wanprj array from every MPI process
-if (np_mpi.gt.1) then
+if (np_mpi > 1) then
   n=ld*nst*nspinor*norb*nproj*nkpt
   call mpi_allreduce(mpi_in_place,wanprj,n,mpi_double_complex, &
                      mpi_sum,mpicom,ierror)

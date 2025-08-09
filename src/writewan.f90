@@ -22,12 +22,12 @@ complex(8), allocatable :: dmat(:,:,:,:,:)
 !integer, allocatable :: idxwan(:,:), projst(:)
 integer, allocatable :: projst(:)
 
-if(norb.le.0) then
+if(norb <= 0) then
   write(*,*) 'No projected orbital specified. Stopping.'
   stop
 endif
 !ensure correct the correlated window bounds
-if(emincor.gt.emaxcor) then
+if(emincor > emaxcor) then
   write(*,*) 'Lower correlated window bound greater than upper bound. Stopping.'
   stop
 endif
@@ -59,8 +59,8 @@ if(wanind) then
   if(ncmag.or.spinorb) iscp=1 
   !if spins are decoupled in Hamiltonian - spins are in two blocks
   if((spinpol).and.(.not.ncmag).and.(.not.spinorb)) nst=nstfv
-  if((imin.lt.1).or.(imin.gt.nst).or. &
-     (imax.lt.1).or.(imax.gt.nst)) then
+  if((imin < 1).or.(imin > nst).or. &
+     (imax < 1).or.(imax > nst)) then
     write(*,*) 'Wrong band indices for correlated energy window used.'
     write(*,*) 'Please changes these indices.'
     stop
@@ -69,11 +69,11 @@ endif
 !if outputting projectors into irreducible basis
 if(cubic) lmirep=.true.
 !if generating projectors of different ngridk, FS or bandstructure
-if((task.eq.806).or.(task.eq.807).or.(task.eq.820)) then
+if((task == 806).or.(task == 807).or.(task == 820)) then
 ! Output the energy eigenvalues and vectors to a new extension
-  if(task.eq.807) then
+  if(task == 807) then
     filext='_FS.OUT'
-  elseif(task.eq.820) then
+  elseif(task == 820) then
     filext='_WANBAND.OUT'
   endif
 ! generate desired eigenvalues and states and save them to
@@ -81,10 +81,10 @@ if((task.eq.806).or.(task.eq.807).or.(task.eq.820)) then
   call genevfsv
 ! set occsv to occmax for wannier projectors needed for spectral functions
   occsv(:,:) = occmax
-  if(task.eq.806) call occupy
+  if(task == 806) call occupy
 ! output energies and wkpt for non band structure tasks 
   if (mp_mpi) then
-    if(task.ne.820) then
+    if(task /= 820) then
       call writeeval
       call writekpts
     else
@@ -100,11 +100,11 @@ nproj=0
 do iorb=1,norb
   is = orb(iorb,1)
   l = orb(iorb,2)
-  if(is.le.0) then
+  if(is <= 0) then
     write(*,*) '(writewanproj) incorrect species for orbital. Stopping.'
     stop
   endif
-  if(l.lt.0) then
+  if(l < 0) then
     write(*,*) '(writewanproj) incorrect l for orbital. Stopping.'
     stop
   endif
@@ -128,7 +128,7 @@ do iorb=1,norb
     call su2lm(lmmax,l,rlm,ias,subulm(:,:,iorb,ia),sublm(:,iorb,ia))
 !check that the correct lm values have been inputted
     do lm=1,rlm
-      if((sublm(lm,iorb,ia).le.0).or.(sublm(lm,iorb,ia).gt.lmmax)) then
+      if((sublm(lm,iorb,ia) <= 0).or.(sublm(lm,iorb,ia) > lmmax)) then
         write(*,*) '(wannierproj) incorrect lm values input. Stopping'
         write(*,*) rlm,sublm(lm,iorb,ia)
         stop
@@ -145,11 +145,11 @@ projst(:)=0
 !determine the states in the band window
 do ik=1,nkpt
 !read the second variational energy eigenvalues from EVALSV.OUT
-  if((task.eq.804).or.(task.eq.805)) then
+  if((task == 804).or.(task == 805)) then
     call getevalsv(filext,ik,vkl(:,ik),evalsv(:,ik))
     call getoccsv(filext,ik,vkl(:,ik),occsv(:,ik))
 !put occupations for denser k-mesh projector calc
-  elseif(task.eq.806) then
+  elseif(task == 806) then
     call putoccsv(filext,ik,occsv)
   endif
 ! count and index states at k in energy window
@@ -167,8 +167,8 @@ do ik=1,nkpt
 ! for energy window bounds input
   else
     do ist=1,nstsv
-      if(((evalsv(ist,ik)-efermi).ge.emincor) .and. & 
-         ((evalsv(ist,ik)-efermi).le.emaxcor)) then
+      if(((evalsv(ist,ik)-efermi) >= emincor) .and. & 
+         ((evalsv(ist,ik)-efermi) <= emaxcor)) then
         nst=nst+1
         idxwan(nst,ik)=ist
       end if
@@ -195,7 +195,7 @@ wanprj(:,:,:,:,:,:)=0.d0
 ! call wannier projector routines 
 call wanproj(ld,nproj,nst,projst,sublm,subulm,wanprj)
 !Calculate local variables
-if((task.ne.804).and.(task.ne.807).and.(task.ne.820)) then
+if((task /= 804).and.(task /= 807).and.(task /= 820)) then
 !allocate the local density matrix
   ld2=(lmaxdm+1)**2
   allocate(dmat(ld2,nspinor,ld2,nspinor,natmtot))
@@ -216,7 +216,7 @@ endif
 !write the projector files
 if (mp_mpi) call writewanproj(lmmax,nst,nproj,projst,subulm,sublm,wanprj)
 ! Return extension to default if necessary
-if((task.eq.807).or.(task.eq.820)) filext='.OUT'
+if((task == 807).or.(task == 820)) filext='.OUT'
 deallocate(subulm,sublm,idxwan,wanprj,projst)
 return
 end subroutine

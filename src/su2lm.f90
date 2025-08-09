@@ -76,19 +76,19 @@ complex(8), intent(inout) :: cub(lmmax,lmmax) !assumed to be zero at entry of su
 !local
 integer i
 !define the cubic unitary rotation matrix
-if(l.eq.0) then
+if(l == 0) then
   cub(1,1)=1.d0
-elseif(l.eq.1) then
+elseif(l == 1) then
   cub(1,1)=cmplx(1.d0/sqrt(2.d0),0.d0,8); cub(1,3)=cmplx(0.d0,-1.d0/sqrt(2.d0),8)
   cub(2,1)=cmplx(0.d0,1.d0/sqrt(2.d0),8); cub(2,3)=cmplx(0.d0,1.d0/sqrt(2.d0),8)
   cub(3,2)=cmplx(1.d0,0.d0,8)
-elseif(l.eq.2) then
+elseif(l == 2) then
   cub(1,3)=cmplx(1.d0,0.d0,8)
   cub(2,1)=cmplx(1.d0/sqrt(2.d0),0.d0,8); cub(2,5)=cmplx(1.d0/sqrt(2.d0),0.d0,8)
   cub(3,1)=cmplx(-1.d0/sqrt(2.d0),0.d0,8); cub(3,5)=cmplx(1.d0/sqrt(2.d0),0.d0,8)
   cub(4,2)=cmplx(1.d0/sqrt(2.d0),0.d0,8); cub(4,4)=cmplx(-1.d0/sqrt(2.d0),0.d0,8)
   cub(5,2)=cmplx(1.d0/sqrt(2.d0),0.d0,8); cub(5,4)=cmplx(1.d0/sqrt(2.d0),0.d0,8)
-elseif(l.eq.3) then
+elseif(l == 3) then
   cub(1,1)=cmplx(1.d0/sqrt(2.d0),0.d0,8); cub(1,7)=cmplx(-1.d0/sqrt(2.d0),0.d0,8)
   cub(2,2)=cmplx(1.d0/sqrt(2.d0),0.d0,8); cub(2,6)=cmplx(1.d0/sqrt(2.d0),0.d0,8)
   cub(3,3)=cmplx(1.d0/sqrt(2.d0),0.d0,8); cub(3,5)=cmplx(-1.d0/sqrt(2.d0),0.d0,8)

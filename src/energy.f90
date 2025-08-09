@@ -177,7 +177,7 @@ do ias=1,natmtot
 end do
 ! valence eigenvalues
 !adnj edit - use kohn sham density matrix from DMFT calculation
-if(task.eq.808) then
+if(task == 808) then
   do ik=1,nkpt
     do ist=1,nstsv
       evalsum=evalsum+wkpt(ik)*dmatkdmft(ist,ist,ik)*occmax*evalsv(ist,ik)
@@ -271,7 +271,7 @@ engytot=engykn+0.5d0*engyvcl+engymad+engyx+engyc+engyts
 ! add the DFT+U correction if required
 if (dftu /= 0) engytot=engytot+engydu
 ! adnj - add the DFT+DMFT correction if required
-if (task.eq.808) engytot=engytot+engydmft-engyts
+if (task == 808) engytot=engytot+engydmft-engyts
 ! write total energy to test file
 call writetest(0,'total energy',tol=1.d-5,rv=engytot)
 end subroutine

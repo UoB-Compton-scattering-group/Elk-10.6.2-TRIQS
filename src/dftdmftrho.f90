@@ -19,20 +19,21 @@ real(8), allocatable :: work(:)
 ! initialise universal variables
 call init0
 call init1
-call init2
-call init3
 ! read density and potentials from file
 call readstate
 call genvsig
+! size of mixing vector
+nmix=size(vmixer)
+! determine the size of the mixer work array
+nwork=-1
+call mixerifc(mixtype,nmix,vmixer,dv,nwork,vmixer)
+allocate(work(nwork))
+! initialise the mixer
+iscl=0
+call mixerifc(mixtype,nmix,vmixer,dv,nwork,work)
+iscl=1
 ! read the Fermi energy
 call readfermi
-! re-calculate the ground-state
-call gencore
-call linengy
-call genapwlofr
-call gensocfr
-call genevfsv
-call occupy
 
 if (mp_mpi) then
 ! check if interface has been generated from a potential previous loop 
@@ -55,46 +56,28 @@ if (mp_mpi) then
 ! open MOMENTM.OUT
   if (spinpol) open(68,file='MOMENTM.OUT',form='FORMATTED')
   call writebox(60,"Calculating DFT+DMFT density")
-end if
-! size of mixing vector
-nmix=size(vmixer)
-! determine the size of the mixer work array
-nwork=-1
-call mixerifc(mixtype,nmix,vmixer,dv,nwork,vmixer)
-allocate(work(nwork))
-! initialise the mixer
-iscl=0
-call mixerifc(mixtype,nmix,vmixer,dv,nwork,work)
-iscl=1
-if (mp_mpi) then
   write(60,*)
   write(60,'("Previous Kohn-Sham Fermi energy : ",G18.10)') efermi
 end if
 
-!read in dmft density matrix
-call getdmatdmft
-! compute the DFT+DMFT density matrices and write the natural orbitals and occupation
-! numbers to EVECSV.OUT and OCCSV.OUT, respectively
-call holdthd(nkpt/np_mpi,nthd)
-!$OMP PARALLEL DO DEFAULT(SHARED) &
-!$OMP SCHEDULE(DYNAMIC) &
-!$OMP NUM_THREADS(nthd)
-do ik=1,nkpt
-! distribute among MPI processes
-  if (mod(ik-1,np_mpi) /= lp_mpi) cycle
-  call gwdmatk(ik)
-end do
-!$OMP END PARALLEL DO
-call freethd(nthd)
-! broadcast occupation number array to every MPI process
-if (np_mpi > 1) then
-  do ik=1,nkpt
-    lp=mod(ik-1,np_mpi)
-    call mpi_bcast(occsv(:,ik),nstsv,mpi_double_precision,lp,mpicom,ierror)
-  end do
-end if
-! determine the DFT+DMFT density and magnetisation
-call rhomag
+! re-calculate the Kohn-Sham energies and occupations
+! generate the core wavefunctions and densities
+call gencore
+! find the new linearisation energies
+call linengy
+! write out the linearisation energies
+if (mp_mpi) call writelinen
+! generate the APW and local-orbital radial functions and integrals
+call genapwlofr
+! generate the spin-orbit coupling radial functions
+call gensocfr
+! generate the first- and second-variational eigenvectors and eigenvalues
+call genevfsv
+! find the occupation numbers and Fermi energy
+call occupy
+
+!calculate the DFT+DMFT density
+call dmftrhomag
 ! compute the Kohn-Sham potential and magnetic field before potential mixing
 if (.not.mixrho) call potks(.true.)
 ! mix the old density/magnetisation or potential/field with the new
@@ -103,14 +86,19 @@ call mixerifc(mixtype,nmix,vmixer,dv,nwork,work)
 if (mixrho) call potks(.true.)
 ! Fourier transform Kohn-Sham potential to G-space
 call genvsig
+
+! calculate the updated Kohn-Sham energy eigenvectors, eigenvalues
+! and occupations from the DFT+DMFT density
+! generate the APW and local-orbital radial functions and integrals
+call genapwlofr
+! generate the spin-orbit coupling radial functions
+call gensocfr
+! generate the first- and second-variational eigenvectors and eigenvalues
+call genevfsv
+! find the occupation numbers and Fermi energy
+call occupy
 ! compute the energy components
 call energy
-! calculate the Kohn-Sham energy eigenvectors, eigenvalues
-! and occupations from the updated DFT+DMFT density
-call genapwlofr
-call gensocfr
-call genevfsv
-call occupy
 
 if (mp_mpi) then
 ! write the Kohn-Sham occupation numbers to file
@@ -121,11 +109,8 @@ if (mp_mpi) then
   call writefermi
 ! write STATE.OUT file
   call writestate
-! adnj edit - output DMFT energy components. Note that the total
-!             energy will not be used as a convergence criteria
-  !if(task.ne.630) 
+! output DFT+DMFT energy components. (Total energy not used in convergence criteria)
   call writeengy(60)
-! end edit
   write(60,*)
   write(60,'("Density of states at Fermi energy : ",G18.10)') fermidos
   write(60,'(" (states/Hartree/unit cell)")')
@@ -162,7 +147,7 @@ if (mp_mpi) then
   write(65,'(G18.10)') dv
   flush(65)
 end if
-if (dv.lt.epspot) then
+if (dv < epspot) then
   if (mp_mpi) then
     write(60,*)
     write(60,'("Convergence targets achieved")')

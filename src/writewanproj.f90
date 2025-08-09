@@ -99,14 +99,14 @@ do iorb=1,norb
       ! determine the band index window for each spinor
       if((.not.spinorb).and.(spinpol)) then
         do ist=1,mst
-          if((idxwan(ist,ik).gt.nstfv)) then
+          if((idxwan(ist,ik) > nstfv)) then
             !if there are no majority states
-            if(ist.eq.1) then
+            if(ist == 1) then
               idxwin(1,2)=1
               idxwin(2,2)=mst
               exit
             !if there are no minority states
-            elseif(ist.eq.nst) then
+            elseif(ist == nst) then
               idxwin(1,1)=1
               idxwin(2,1)=mst
               exit
@@ -128,7 +128,7 @@ do iorb=1,norb
       do ispn=1,nspinor
         istmin=idxwin(1,ispn)
         istmax=idxwin(2,ispn)
-        if((istmin.eq.0).or.(istmax.eq.0)) then
+        if((istmin == 0).or.(istmax == 0)) then
           write(800,'(I8,I8,I8," : spinor index, minimum and maximum band indices ")') ispn,0,0
           cycle
         endif

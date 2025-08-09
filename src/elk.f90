@@ -289,7 +289,7 @@ do itask=1,ntasks
     call dftdmftrho
 ! generate the density matrix from the DMFT density matrix
   case(809)
-    call gwdmat
+    call dmftdmat
 ! end edit
   case default
     write(*,*)

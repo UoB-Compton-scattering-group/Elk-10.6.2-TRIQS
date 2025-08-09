@@ -3,9 +3,8 @@
 ! This file is distributed under the terms of the GNU General Public License.
 ! See the file COPYING for license details.
 
-subroutine gwdmat
+subroutine dmftdmat
 use modmain
-use modgw
 use modmpi
 use modomp
 implicit none
@@ -21,9 +20,10 @@ call readfermi
 do ik=1,nkpt
   call getevalsv(filext,ik,vkl(:,ik),evalsv(:,ik))
 end do
-! determine the GW Fermi energy
-call gwefermi
-! compute the GW density matrices and write the natural orbitals and occupation
+!get DFT+DMFT density matrix
+call occupy
+call getdmatdmft
+! compute the DFT+DMFT density matrices and write the natural orbitals and occupation
 ! numbers to EVECSV.OUT and OCCSV.OUT, respectively
 call holdthd(nkpt/np_mpi,nthd)
 !$OMP PARALLEL DO DEFAULT(SHARED) &
@@ -32,7 +32,7 @@ call holdthd(nkpt/np_mpi,nthd)
 do ik=1,nkpt
 ! distribute among MPI processes
   if (mod(ik-1,np_mpi) /= lp_mpi) cycle
-  call gwdmatk(ik)
+  call dmftdmatk(ik)
 end do
 !$OMP END PARALLEL DO
 call freethd(nthd)
@@ -49,8 +49,8 @@ if (mp_mpi) then
     call putoccsv(filext,ik,occsv(:,ik))
   end do
   write(*,*)
-  write(*,'("Info(gwdmat):")')
-  write(*,'(" GW density matrices determined for each k-point")')
+  write(*,'("Info(dmftdmat):")')
+  write(*,'(" DFT+DMFT density matrices determined for each k-point")')
   write(*,*)
   write(*,'(" Natural orbitals and occupation numbers written to")')
   write(*,'(" EVECSV.OUT and OCCSV.OUT, respectively")')

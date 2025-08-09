@@ -2245,7 +2245,7 @@ case('bdipscf')
 case('wanproj')
 ! number of projectors
   read(50,*,err=20) norb
-  if(norb.le.0) then
+  if(norb <= 0) then
     write(*,*) 'Invalid number of projectors, norb = ', norb
     write(*,*) 'Need to input norb > 0 '
   end if
@@ -2261,7 +2261,7 @@ case('wanproj')
     read(50,*,err=20) orb(i,:)
 ! make sure that the reduced value is less than 2l+1
     if (mp_mpi) then
-      if(orb(i,3).gt.(2*orb(i,2)+1)) then
+      if(orb(i,3) > (2*orb(i,2)+1)) then
         write(*,*) 'Invalid number of reduced lm indices for projector ', i
         stop
       end if

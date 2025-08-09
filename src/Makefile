@@ -220,7 +220,7 @@ SRC_DMFT = \
  writewan.f90 wanproj.f90 wanprojk.f90 wanolp.f90 wannorm.f90 su2lm.f90\
  wanchg.f90 wangloc.f90 getdmatdmft.f90 genwfsvpwan.f90 writeband.f90\
  writewanproj.f90 writewanchg.f90 writewangloc.f90 writebandchar.f90\
- getbandchar.f90 dftdmftrho.f90
+ getbandchar.f90 dftdmftrho.f90 dmftdmat.f90 dmftdmatk.f90 dmftrhomag.f90
 
 SRC = $(SRC_modules) $(SRC_FFT) $(SRC_elk) $(SRC_main) $(SRC_phonon) \
  $(SRC_XC) $(SRC_DFTU) $(SRC_RDMFT) $(SRC_GW) $(SRC_TDDFT) \

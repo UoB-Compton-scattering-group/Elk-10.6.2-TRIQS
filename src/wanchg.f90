@@ -45,7 +45,7 @@ do iorb=1,norb
       allocate(z1(lmmax,mst),z2(lmmax,mst),z3(lmmax,lmmax))
       do ispn=1,nspinor
         do jspn=1,nspinor
-          if (tspndg.and.(ispn.ne.jspn)) cycle
+          if (tspndg.and.(ispn /= jspn)) cycle
 !set KS state integers into temp complex arrays
           z1(:,:)=wantrue(1:lmmax,1:mst,ispn,iorb,ia,ik)
           z2(:,:)=wantrue(1:lmmax,1:mst,jspn,iorb,ia,ik)
@@ -133,7 +133,7 @@ real(8) f
 
 do lm1=1,lmmax
   do lm2=1,lmmax
-    if (tlmdg.and.(lm1.ne.lm2)) cycle
+    if (tlmdg.and.(lm1 /= lm2)) cycle
     do ist=1,mst
       jst=idx(ist)
       f=occsv(jst,ik)

@@ -20,7 +20,7 @@ complex(8) z1
 !correlated orb ias index
 is=idxis(ias)
 iro=nrmti(is)+lradstp
-if (lradstp.eq.1) then
+if (lradstp == 1) then
   nr=nrmt(is)
   nri=nrmti(is)
   npi=npmti(is)
@@ -38,7 +38,7 @@ do ispn=1,nspinor
       z1=zzero
       i=npi+lm
 ! calculating the overlap between wfmt and the (apw) radial function
-      if (l.le.lmaxi) then
+      if (l <= lmaxi) then
         p=lm
         jr=1
         do ir=1,nri

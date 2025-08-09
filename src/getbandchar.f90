@@ -54,14 +54,14 @@ end if
 ! desired spin-quantisation axis
 v1(:)=sqados(:)
 t1=sqrt(v1(1)**2+v1(2)**2+v1(3)**2)
-if (t1.le.epslat) then
+if (t1 <= epslat) then
   write(*,*)
   write(*,'("Error(dos): spin-quantisation axis (sqados) has zero length")')
   write(*,*)
   stop
 end if
 v1(:)=v1(:)/t1
-if (v1(3).ge.1.d0-epslat) then
+if (v1(3) >= 1.d0-epslat) then
   tsqaz=.true.
 else
   tsqaz=.false.
@@ -82,7 +82,7 @@ call holdthd(nkptnr,nthd)
 !$OMP PRIVATE(jk,wo,ispn,jspn,vl,vc) &
 !$OMP PRIVATE(is,ia,ias,ist,lm,b,c,t1) &
 !$OMP NUM_THREADS(nthd)
-if (task.eq.802) allocate(evalfv(nstfv,nspnfv))
+if (task == 802) allocate(evalfv(nstfv,nspnfv))
 allocate(apwalm(ngkmax,apwordmax,lmmaxapw,natmtot,nspnfv))
 allocate(evecfv(nmatmax,nstfv,nspnfv),evecsv(nstsv,nstsv))
 allocate(dmat(lmmax,nspinor,lmmax,nspinor,nstsv),a(lmmax,lmmax))
@@ -90,7 +90,7 @@ allocate(dmat(lmmax,nspinor,lmmax,nspinor,nstsv),a(lmmax,lmmax))
 !do ik=1,nkpt
 do ik=1,nkptnr
 ! equivalent reduced k-point
-  if(task.eq.802) then
+  if(task == 802) then
     jk=ik
     wo=1.d0
   else
@@ -105,7 +105,7 @@ do ik=1,nkptnr
     vc(:)=vkc(:,ik)
 ! spin-spiral case
     if (spinsprl) then
-      if (ispn.eq.1) then
+      if (ispn == 1) then
         vl(:)=vl(:)+0.5d0*vqlss(:)
         vc(:)=vc(:)+0.5d0*vqcss(:)
       else
@@ -117,7 +117,7 @@ do ik=1,nkptnr
     call match(ngk(ispn,ik),vgkc(:,:,ispn,ik),gkc(:,ispn,ik), &
      sfacgk(:,:,ispn,ik),apwalm(:,:,:,:,ispn))
   end do
-  if(task.eq.802) then
+  if(task == 802) then
 ! generate the eigenvectors from file for non-reduced k-point
     call eveqn(ik,evalfv,evecfv,evecsv)
   else
@@ -173,7 +173,7 @@ do ik=1,nkptnr
 end do
 !$OMP END DO
 deallocate(apwalm,evecfv,evecsv,dmat,a)
-if (task.eq.802) deallocate(evalfv)
+if (task == 802) deallocate(evalfv)
 !$OMP END PARALLEL
 call freethd(nthd)
 if (lmirep) deallocate(elm,ulm)

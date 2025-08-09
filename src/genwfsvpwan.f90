@@ -3,14 +3,14 @@
 ! This file is distributed under the terms of the GNU General Public License.
 ! See the file COPYING for license details.
 
-subroutine genwfsvpwan(tsh,tgp,ikp,nst,idx,ngdg,igf,vpl,ngp,igpig,wfmt,ld,wfir)
+subroutine genwfsvpwan(tsh,tgp,ikp,nst,idx,ngridg_,igfft_,vpl,ngp,igpig,wfmt,ld,wfir)
 !adnj - same as genwfsvp but with ikp input needed to read wan band evec states
 use modmain
 implicit none
 ! arguments
 logical, intent(in) :: tsh,tgp
 integer, intent(in) :: ikp ! adnj new input required to output wan bandstr
-integer, intent(in) :: nst,idx(*),ngdg(3),igf(*)
+integer, intent(in) :: nst,idx(*),ngridg_(3),igfft_(*)
 real(8), intent(in) :: vpl(3)
 integer, intent(out) :: ngp(nspnfv),igpig(ngkmax,nspnfv)
 complex(8), intent(out) :: wfmt(npcmtmax,natmtot,nspinor,nst)
@@ -28,16 +28,16 @@ allocate(sfacgp(ngkmax,natmtot))
 allocate(apwalm(ngkmax,apwordmax,lmmaxapw,natmtot,nspnfv))
 ! loop over first-variational spins
 do ispn=1,nspnfv
-  vl(:)=vpl(:)
-  vc(:)=bvec(:,1)*vpl(1)+bvec(:,2)*vpl(2)+bvec(:,3)*vpl(3)
+  vl(1:3)=vpl(1:3)
+  vc(1:3)=bvec(1:3,1)*vpl(1)+bvec(1:3,2)*vpl(2)+bvec(1:3,3)*vpl(3)
 ! spin-spiral case
   if (spinsprl) then
-    if (ispn.eq.1) then
-      vl(:)=vl(:)+0.5d0*vqlss(:)
-      vc(:)=vc(:)+0.5d0*vqcss(:)
+    if (ispn == 1) then
+      vl(1:3)=vl(1:3)+0.5d0*vqlss(1:3)
+      vc(1:3)=vc(1:3)+0.5d0*vqcss(1:3)
     else
-      vl(:)=vl(:)-0.5d0*vqlss(:)
-      vc(:)=vc(:)-0.5d0*vqcss(:)
+      vl(1:3)=vl(1:3)-0.5d0*vqlss(1:3)
+      vc(1:3)=vc(1:3)-0.5d0*vqcss(1:3)
     end if
   end if
 ! generate the G+p-vectors
@@ -54,9 +54,8 @@ allocate(evecfv(nmatmax,nstfv,nspnfv),evecsv(nstsv,nstsv))
 call getevecfv(filext,ikp,vpl,vgpl,evecfv)
 call getevecsv(filext,ikp,vpl,evecsv) 
 ! calculate the second-variational wavefunctions
-call genwfsv(tsh,tgp,nst,idx,ngdg,igf,ngp,igpig,apwalm,evecfv,evecsv,wfmt,ld, &
- wfir)
+call genwfsv(tsh,tgp,nst,idx,ngridg_,igfft_,ngp,igpig,apwalm,evecfv,evecsv, &
+ wfmt,ld,wfir)
 deallocate(apwalm,evecfv,evecsv)
-return
 end subroutine
 

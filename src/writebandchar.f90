@@ -13,7 +13,7 @@ character(256) fileext
 real(4), allocatable :: bc(:,:,:,:,:)
 
 task_=task
-if(task.eq.802) then
+if(task == 802) then
   task=20
   fileext='_BAND.OUT'
 else 

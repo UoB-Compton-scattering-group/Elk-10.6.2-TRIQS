@@ -6,7 +6,12 @@ Interface:
 - using vmixer (as in gndstate.f90) in dftdmftrho.f90 so the DFT+DMFT mixing can 
   be done with the potential or density.
 - added test for the DFT+DMFT eletron density subroutines using the DFT 
-  density matrix. 
+  density matrix. This also includes running the DFT+DMFT density matrix diagonalisation
+  task (809).
+- separated the diagonalisation of the DFT+DMFT density matrix into their own subroutines.
+  Also put calculation of DFT+DMFT density in its own subroutine. This is analogous
+  to that done for GW. New files are dmftrhomag, dmftdmat and dmftdmatk (similarly named as
+  the GW versions.)
 
 Developer TO DO:
 - Test tasks 803 (outputs seem reasonable for Test 36), 808 (Runs fine) and 809 (Runs fine).

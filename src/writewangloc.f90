@@ -35,7 +35,7 @@ do iorb=1,norb
       write(exfmt,'("(",I8,"(F16.8))")') lmmax+1
       do ispn=1,nspinor
         do jspn=1,nspinor
-          if((ispn.ne.jspn).and.(.not.ncmag).and.(.not.spinorb)) cycle
+          if((ispn /= jspn).and.(.not.ncmag).and.(.not.spinorb)) cycle
           do iw=1,nwplot
             !write the spectral function
             write(801,exfmt)wr(iw), &

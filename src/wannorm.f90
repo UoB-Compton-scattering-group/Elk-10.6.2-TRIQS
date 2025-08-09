@@ -143,7 +143,7 @@ allocate(work(2*lmmax-1))
 allocate(rwork(3*lmmax-2))
 call zheev('V', 'U', lmmax, Z, lmmax, w, work,2*lmmax-1, rwork, info)
 !A is now the eigenvectors Z, making sure that the decomposition worked
-if(info.ne.0) then
+if(info /= 0) then
   write(*,*)'wanproj: zheev has returned a non zero info value - ',info
   write(*,*)'         The inverse square matrix could not be calculated.'
   write(*,*)'         This interface will stop.'
@@ -152,15 +152,15 @@ endif
 !making sure that the calculated eigenvalues are okay for calculating the 
 !projectors. Warns the user that the resulting projectors may be wrong 
 do i=1,lmmax
-  if(w(i).lt.0d0) then
+  if(w(i) < 0d0) then
     write(*,*)'wanproj WARNING: Eigenvalue of overlap matrix (', i,') is negative.'
     write(*,*)'                 The projectors may be wrong. Try using a different energy window'
   endif
-  if(w(i).lt.1d-12) then
+  if(w(i) < 1d-12) then
     write(*,*)'wanproj WARNING: Eigenvalue of overlap matrix (', i,') is close to 0.'
     write(*,*)'                 The projectors may be wrong. Try using a different energy window'
   endif
-  if(w(i).eq.0.d0) then
+  if(w(i) == 0.d0) then
     write(*,*)'wanproj: Eigenvalue of overlap matrix (', i,') is equal to 0.'
     write(*,*)'         Can not calculate the inverse square matrix.'
     write(*,*)'         Stopping.'

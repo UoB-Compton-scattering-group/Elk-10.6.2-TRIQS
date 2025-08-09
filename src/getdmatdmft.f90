@@ -1,9 +1,10 @@
-!Written by A. D. N. James
-
-subroutine getdmatdmft
+! Copyright (C) 2021 A. D. N. James
+! This file is distributed under the terms of the GNU General Public License.
+! See the file COPYING for license details.
 
 !ADNJ - This routine is the temporary interface from TRIQS to Elk. It reads the DMFT density
 ! matrix from DMATDMFT.OUT to interface back into the DFT cycle for a self-consistent DFT+DMFT  
+subroutine getdmatdmft
 
 use modmain
 !use modomp
@@ -17,6 +18,7 @@ real(8) mu, beta
 real(8), allocatable :: rd(:), id(:)
 
 !allocate the dmft density matrix
+if (allocated(dmatkdmft)) deallocate(dmatkdmft)
 allocate(dmatkdmft(nstsv,nstsv,nkpt))
 !zero density matrix
 dmatkdmft(:,:,:)=0.d0
@@ -24,7 +26,7 @@ dmatkdmft(:,:,:)=0.d0
 do ist=1,nstsv
   !new occsv will be scaled by occmax after diagonalisation (in gwdmatk.f90)
   dmatkdmft(ist,ist,:)=occsv(ist,:)/occmax
-enddo
+end do
 
 ! return if testing without reading external file
 if (without_dmftdmat) return
@@ -41,7 +43,7 @@ open(32,file='DMATDMFT.OUT',action='READ',form='FORMATTED')
 !reads chemical potential (eV)
 read(32,*)nkpt_,nspin_,nst,beta,mu
 !A check of the read in parameters
-if (nkpt.ne.nkpt_) then
+if (nkpt /= nkpt_) then
   write(*,*)
   write(*,'("Error(getdmatdmft): differing nkpt ")')
   write(*,'(" current    : ",I8)') nkpt
@@ -49,7 +51,7 @@ if (nkpt.ne.nkpt_) then
   write(*,*)
   stop
 end if
-if (nspin.ne.nspin_) then
+if (nspin /= nspin_) then
   write(*,*)
   write(*,'("Error(getdmatdmft): differing nspinor")')
   write(*,'(" current    : ",I8)') nspin
@@ -65,10 +67,10 @@ do ik=1,nkpt
     do ist=minst,maxst
       read(32,*) (rd(jst),id(jst),jst=minst,maxst)
       dmatkdmft(ist,minst:maxst,ik)=CMPLX(rd,id)
-    enddo
+    end do
     deallocate(rd,id)
-  enddo
-enddo 
+  end do
+end do 
 !calculate the dmft temperature
 tempk=1/(beta*kboltz)
 if (mp_mpi) then

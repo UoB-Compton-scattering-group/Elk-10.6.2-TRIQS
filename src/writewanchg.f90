@@ -31,7 +31,7 @@ do iorb=1,norb
     write(exfmt,'("(",I8,"(F16.8))")') lmmax
     do ispn=1,nspinor
       do jspn=1,nspinor
-        if((ispn.ne.jspn).and.(.not.ncmag).and.(.not.spinorb)) cycle
+        if((ispn /= jspn).and.(.not.ncmag).and.(.not.spinorb)) cycle
         z=0.d0
         write(810,'("Spinor block ",I2,",",I2,":")') ispn, jspn
         write(810,'("Real part of this Wannier density matrix:")') 
