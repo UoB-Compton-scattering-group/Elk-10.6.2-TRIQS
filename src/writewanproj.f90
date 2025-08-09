@@ -28,7 +28,7 @@ open(805,file=trim(fname),form='FORMATTED')
 !output flag for spin-coupled (spin-orbit coupling) calculations
 so = 0
 if(ncmag .or. spinorb) so = 1
-write(805,'(I4,I8,I8,I8,I8" : nproj, nkpt, nspinor, spinorb, natmtot")') &
+write(805,'(I4,I8,I8,I8,I8," : nproj, nkpt, nspinor, spinorb, natmtot")') &
                                             norb,nkpt,nspinor,so,natmtot
 do iorb=1,norb
   is=orb(iorb,1)
@@ -36,13 +36,12 @@ do iorb=1,norb
   rlm=orb(iorb,3)
   lmmax=2*l+1
   na=natoms(is)
-  write(805,'(I4" : Proj index")') iorb
-  write(805,'(I4,I4,I4,I4" : Species index, natoms, l, lm submatrix size")') is,na,l,rlm
+  write(805,'(I4," : Proj index")') iorb
+  write(805,'(I4,I4,I4,I4," : Species index, natoms, l, lm submatrix size")') is,na,l,rlm
 !determine the number of equivalent atoms
   allocate(done(natmtot))
   done(:)=.false.
-  write(extfmt,'("("I3"(I4)")') rlm
-  extfmt=trim(extfmt)//'," : lm indices")'
+  write(extfmt, '(A,I0,A)') '(', rlm, '(I4), A)'
   do ia=1,natoms(is)
     if(done(ia)) cycle
     eqva=0

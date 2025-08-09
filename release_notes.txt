@@ -12,6 +12,8 @@ Interface:
   Also put calculation of DFT+DMFT density in its own subroutine. This is analogous
   to that done for GW. New files are dmftrhomag, dmftdmat and dmftdmatk (similarly named as
   the GW versions.)
+- Fixed Fortran file formatting issues which crashes the Wannier projector task with newer 
+  compilers. 
 
 Developer TO DO:
 - Test tasks 803 (outputs seem reasonable for Test 36), 808 (Runs fine) and 809 (Runs fine).
