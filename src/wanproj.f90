@@ -81,7 +81,6 @@ do iorb=1,norb
   enddo
   deallocate(done,idxiea,a,z1)
 enddo
-write(*,*) 1
 ! begin parallel loop over k-points
 ! synchronise MPI processes
 call mpi_barrier(mpicom,ierror)
