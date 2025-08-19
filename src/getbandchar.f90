@@ -1,9 +1,9 @@
 
-! Copyright (C) 2002-2008 J. K. Dewhurst, S. Sharma and C. Ambrosch-Draxl.
-! This file is distributed under the terms of the GNU General Public License.
-! See the file COPYING for license details.
+! Copyright (C) 2025 A. D. N. James. 
+! This file is distributed under the terms of the GNU General
+! Public License. See the file COPYING for license details.
 
-!rewritten by A. D. N. James
+!(from dos.f90)
 
 subroutine getbandchar(tspndg,tlmdg,lmmax,bc)
 use modmain

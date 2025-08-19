@@ -1,4 +1,6 @@
-!Written by A. D. N. James
+! Copyright (C) 2025 A. D. N. James. 
+! This file is distributed under the terms of the GNU General
+! Public License. See the file COPYING for license details.
 
 subroutine wannorm(nst,ld,nproj,sublm,wantemp,wantrue)
 !Orthonormalises the temporary wannier projectors to calculate the true Wannier

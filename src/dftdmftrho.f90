@@ -1,17 +1,16 @@
 
-! Copyright (C) 2018 A. Davydov, P. Elliott, J. K. Dewhurst, S. Sharma and
-! E. K. U. Gross. This file is distributed under the terms of the GNU General
+! Copyright (C) 2025 A. D. N. James. 
+! This file is distributed under the terms of the GNU General
 ! Public License. See the file COPYING for license details.
 
 subroutine dftdmftrho
 use modmain
-use modgw
 use modmpi
 use modomp
 implicit none
 ! local variables
 logical exist
-integer ik,nthd
+integer ik,nthd,iscl0
 integer nmix,nwork,lp
 real(8) dv
 ! allocatable arrays
@@ -31,20 +30,29 @@ allocate(work(nwork))
 ! initialise the mixer
 iscl=0
 call mixerifc(mixtype,nmix,vmixer,dv,nwork,work)
+! default starting loop
 iscl=1
-! read the Fermi energy
-call readfermi
+! read in starting loop and mixer work array from file if required
+if (mixsave) then
+  inquire(file='MIXWORK'//trim(filext), exist=exist)
+  if (exist) Then
+    call readmix(iscl0,nwork,work)
+    iscl=min(iscl0,mixsdb)
+  end if    
+end if
 
 if (mp_mpi) then
 ! check if interface has been generated from a potential previous loop 
   inquire(file="DMFT_INFO.OUT", exist=exist)
 ! append DMFT_INFO.OUT
   if (exist) then
-      open(60,file='DMFT_INFO.OUT',form='FORMATTED',position='append')
+    open(60,file='DMFT_INFO.OUT',form='FORMATTED',position='append')
 ! create new DMFT_INFO.OUT file
   else
     open(60,file='DMFT_INFO.OUT',form='FORMATTED')
   end if
+! open TOTENERGY.OUT
+  open(61,file='TOTENERGY'//trim(filext),form='FORMATTED')
 ! open FERMIDOS.OUT
   open(62,file='FERMIDOS.OUT',form='FORMATTED')
 ! open MOMENT.OUT if required
@@ -56,6 +64,11 @@ if (mp_mpi) then
 ! open MOMENTM.OUT
   if (spinpol) open(68,file='MOMENTM.OUT',form='FORMATTED')
   call writebox(60,"Calculating DFT+DMFT density")
+! Track DFT+DMFT iteraction if using mixing from file
+  if (mixsave) then
+    write(60,*)
+    write(60,'("Loop number : ",I0)') iscl
+  end if
   write(60,*)
   write(60,'("Previous Kohn-Sham Fermi energy : ",G18.10)') efermi
 end if
@@ -88,7 +101,13 @@ if (mixrho) call potks(.true.)
 call genvsig
 
 ! calculate the updated Kohn-Sham energy eigenvectors, eigenvalues
-! and occupations from the DFT+DMFT density
+! and occupations from the DFT+DMFT density for next DMFT cycle
+! generate the core wavefunctions and densities
+call gencore
+! find the new linearisation energies
+call linengy
+! write out the linearisation energies
+if (mp_mpi) call writelinen
 ! generate the APW and local-orbital radial functions and integrals
 call genapwlofr
 ! generate the spin-orbit coupling radial functions
@@ -105,10 +124,16 @@ if (mp_mpi) then
   do ik=1,nkpt
     call putoccsv(filext,ik,occsv(:,ik))
   end do
+! write new energy eigenvalues and Fermi energy  
   call writeeval
   call writefermi
 ! write STATE.OUT file
   call writestate
+! save mixing and increase iteration counter  
+  if (mixsave) then 
+    iscl = iscl + 1
+    call writemix(nwork,work)
+  end if
 ! output DFT+DMFT energy components. (Total energy not used in convergence criteria)
   call writeengy(60)
   write(60,*)
@@ -119,14 +144,16 @@ if (mp_mpi) then
   write(60,'(" from k-point ",I6," to k-point ",I6)') ikgap(1),ikgap(2)
   write(60,'("Estimated direct band gap   : ",G18.10)') bandgap(2)
   write(60,'(" at k-point ",I6)') ikgap(3)
-! output charges and moments
-  call writechg(60)
-  if (spinpol) call writemom(60)
-  flush(60)
+! write total energy to TOTENERGY.OUT
+  write(61,'(G22.12)') engytot
+  flush(61)
 ! write DOS at Fermi energy to FERMIDOS.OUT
   write(62,'(G18.10)') fermidos
   flush(62)
+! output charges and moments
+  call writechg(60)
   if (spinpol) then
+    call writemom(60)
 ! write total moment to MOMENT.OUT
     write(63,'(3G18.10)') momtot(1:ndmag)
     flush(63)
@@ -137,31 +164,23 @@ if (mp_mpi) then
 ! write estimated Kohn-Sham indirect band gap
   write(64,'(G22.12)') bandgap(1)
   flush(64)
-end if
 ! check for convergence
-if (mp_mpi) then
   write(60,*)
   write(60,'("RMS change in Kohn-Sham potential (target) : ",G18.10," (",&
     &G18.10,")")') dv,epspot
   flush(60)
   write(65,'(G18.10)') dv
   flush(65)
-end if
-if (dv < epspot) then
-  if (mp_mpi) then
+  if (dv < epspot) then
     write(60,*)
     write(60,'("Convergence targets achieved")')
   end if
-end if
-! reset the OpenMP thread variables
-call omp_reset
-
-! synchronise MPI processes
-call mpi_barrier(mpicom,ierror)
-if (mp_mpi) then
+  
   call writebox(60,"Calculated DFT+DMFT density")
 ! close the DMFT_INFO.OUT file
   close(60)
+! close the TOTENERGY.OUT file
+  close(61)
 ! close the FERMIDOS.OUT file
   close(62)
 ! close the MOMENT.OUT and MOMENTM.OUT files
@@ -173,5 +192,8 @@ if (mp_mpi) then
 ! close the RMSDVS.OUT file
   close(65)
 end if
+
+! synchronise MPI processes
+call mpi_barrier(mpicom,ierror)
 end subroutine
 

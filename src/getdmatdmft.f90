@@ -1,6 +1,6 @@
-! Copyright (C) 2021 A. D. N. James
-! This file is distributed under the terms of the GNU General Public License.
-! See the file COPYING for license details.
+! Copyright (C) 2025 A. D. N. James. 
+! This file is distributed under the terms of the GNU General
+! Public License. See the file COPYING for license details.
 
 !ADNJ - This routine is the temporary interface from TRIQS to Elk. It reads the DMFT density
 ! matrix from DMATDMFT.OUT to interface back into the DFT cycle for a self-consistent DFT+DMFT  

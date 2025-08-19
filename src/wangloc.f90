@@ -1,4 +1,6 @@
-!Written by A. D. N. James
+! Copyright (C) 2025 A. D. N. James. 
+! This file is distributed under the terms of the GNU General
+! Public License. See the file COPYING for license details.
 
 subroutine wangloc(tspndg,tlmdg,matsu,nproj,projst,ld,nst,subulm,wantrue,gloc)
 !Calculate the local Green's functions and output its Spectral functions

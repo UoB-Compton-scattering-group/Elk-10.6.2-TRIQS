@@ -1,3 +1,7 @@
+! Copyright (C) 2025 A. D. N. James. 
+! This file is distributed under the terms of the GNU General
+! Public License. See the file COPYING for license details.
+
 subroutine wanchg(tspndg,tlmdg,gf,nproj,projst,ld,ld2,nst,subulm,wantrue,w,dmat)
 !Calculate and output the charge of the Wannier orbital iorb
 use modmain

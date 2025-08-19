@@ -1,3 +1,7 @@
+! Copyright (C) 2025 A. D. N. James. 
+! This file is distributed under the terms of the GNU General
+! Public License. See the file COPYING for license details.
+
 subroutine  su2lm(lmmax,l,rlm,ias,subulm,sublm)
 
 use modmain

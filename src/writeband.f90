@@ -1,4 +1,8 @@
-!Written by A. D. N. James (copied from bandstr.f90)
+! Copyright (C) 2025 A. D. N. James. 
+! This file is distributed under the terms of the GNU General
+! Public License. See the file COPYING for license details.
+
+! (copied from bandstr.f90)
 
 ! !INTERFACE:
 subroutine writeband
