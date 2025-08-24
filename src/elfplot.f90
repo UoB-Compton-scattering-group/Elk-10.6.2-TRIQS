@@ -3,6 +3,8 @@
 ! This file is distributed under the terms of the GNU General Public License.
 ! See the file COPYING for license details.
 
+! Updated by A. D. N. James
+
 !BOP
 ! !ROUTINE: elfplot
 ! !INTERFACE:
@@ -92,6 +94,11 @@ call rfmtctof(gwf2mt)
 call rfirctof(gwf2ir,gwf2ir)
 ! add core wavefunction gradient squared
 call gradwfcr2(gwf2mt)
+!adnj edit - generate the densities from the many-body wavefunctions
+rhomt(:,:)=0.d0
+rhoir(:)=0.d0
+call rhomag
+!end edit
 !------------------------!
 !     muffin-tin ELF     !
 !------------------------!

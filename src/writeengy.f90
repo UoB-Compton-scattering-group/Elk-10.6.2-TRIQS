@@ -3,6 +3,8 @@
 ! This file is distributed under the terms of the GNU Lesser General Public
 ! License. See the file COPYING for license details.
 
+! Updated by A. D. N. James
+
 subroutine writeengy(fnum)
 use modmain
 use moddftu
@@ -31,6 +33,11 @@ write(fnum,'(" correlation",T30,": ",G22.12)') engyc
 if (dftu /= 0) then
   write(fnum,'(" DFT+U",T30,": ",G22.12)') engydu
 end if
+!adnj edit - output the dmft energy contribution
+if (task == 808) then
+  write(fnum,'(" DFT+DMFT",T30,": ",G22.12)') engydmft
+end if
+!end edit
 if (stype == 3) then
   write(fnum,'(" electron entropic",T30,": ",G22.12)') engyts
 end if

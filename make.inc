@@ -76,18 +76,18 @@ SRC_W90S = w90_stub.f90
 
 #-------------------------------------------------------------------------------
 # Intel Fortran compiler classic (ifort) version 18 and later.
-F90 = mpiifort
-F90_OPTS = -O3 -xHost -ipo -qopenmp -mkl=parallel
-F90_LIB = -liomp5 -lpthread -lm -ldl
-SRC_MKL =
-AR = xiar
+#F90 = mpiifort
+#F90_OPTS = -O3 -xHost -ipo -qopenmp -mkl=parallel
+#F90_LIB = -liomp5 -lpthread -lm -ldl
+#SRC_MKL =
+#AR = xiar
 #-------------------------------------------------------------------------------
 
 #-------------------------------------------------------------------------------
 # GNU Fortran compiler with MKL.
-#F90 = mpif90
-#F90_OPTS = -Ofast -march=native -mtune=native -fopenmp -ffpe-summary=none -Wno-lto-type-mismatch
-#F90_LIB = -lmkl_gf_lp64 -lmkl_gnu_thread -lmkl_core -lpthread
+F90 = mpif90
+F90_OPTS = -Ofast -fno-stack-arrays -march=native -mtune=native -fopenmp -ffpe-summary=none -Wno-lto-type-mismatch
+F90_LIB = -lmkl_gf_lp64 -lmkl_gnu_thread -lmkl_core -lpthread
 #SRC_MKL =
 #-------------------------------------------------------------------------------
 

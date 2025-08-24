@@ -153,7 +153,8 @@ tevecsv=.false.
 ! spin-polarised calculations require second-variational eigenvectors
 if (spinpol) tevecsv=.true.
 ! Hartree-Fock/RDMFT/TDDFT/GW/ULR requires second-variational eigenvectors
-if (any(task == [5,10,170,300,460,461,462,463,600,601,620,700,701,720]).or. &
+! ADNJ - added ELFS, DFT+DMFT density, and DFT+DMFT density matrix 
+if (any(task == [5,10,51,52,53,170,300,460,461,462,463,600,601,620,700,701,720,808,809]).or. &
  ksgwrho) then
   tevecsv=.true.
 end if

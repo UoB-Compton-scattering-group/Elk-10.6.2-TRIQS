@@ -249,7 +249,7 @@ do k=2,3
 !     meta-GGA functionals     !
 !------------------------------!
 ! set Tran-Blaha '09 constants if required
-      if ((id.eq.XC_MGGA_X_TB09).and.(present(c_tb09))) then
+      if ((id == XC_MGGA_X_TB09).and.(present(c_tb09))) then
         call xc_f03_func_set_ext_params_name(p,'c',c_tb09)
       end if
       if (k == 2) then
