@@ -1,24 +1,23 @@
 Interface:
-- removed spin coupled flag spcpl from projector subroutines and replaced it with 
+- Removed spin coupled flag spcpl from projector subroutines and replaced it with 
   the combination of ncmag and spinorb (as spcpl = ncmag .or. spinorb).
-- updated the previously name wrmt to wr2mt.
-- renamed the hacked gwscrho.f90 to dftdmftrho.f90 and removed all sc-gw content.  
-- using vmixer (as in gndstate.f90) in dftdmftrho.f90 so the DFT+DMFT mixing can 
-  be done with the potential or density.
-- added test for the DFT+DMFT eletron density subroutines using the DFT 
+- Updated the previously name wrmt to wr2mt.
+- Renamed the hacked gwscrho.f90 to dftdmftrho.f90 and removed all sc-gw content.  
+- Now using vmixer (as in gndstate.f90) in dftdmftrho.f90 so the DFT+DMFT mixing can 
+  be done with the potential or density. Note that the mixing with the density can 
+  be more stable than mixing the potentials.
+- Added test for the DFT+DMFT electron density subroutines using the DFT 
   density matrix. This also includes running the DFT+DMFT density matrix diagonalisation
   task (809).
-- separated the diagonalisation of the DFT+DMFT density matrix into their own subroutines.
+- Separated the diagonalisation of the DFT+DMFT density matrix into their own subroutines.
   Also put calculation of DFT+DMFT density in its own subroutine. This is analogous
-  to that done for GW. New files are dmftrhomag, dmftdmat and dmftdmatk (similarly named as
-  the GW versions.)
+  to that done for GW. New files are dmftrhomag.f90, dmftdmat.f90 and dmftdmatk.f90 
+  (similarly named as the GW versions.)
 - Fixed Fortran file formatting issues which crashes the Wannier projector task with newer 
   compilers. 
+- Added the reading and writing the mixer work array in dftdmftrho.f90 for better mixing 
+  (in theory) after the first iteration.
 
-Developer TO DO:
-- Test tasks 803 (outputs seem reasonable for Test 36), 808 (Runs fine) and 809 (Runs fine).
-  Need to test with TRIQS.
-- merge dmft specific routines into gndstate.f90.
 
 elk-10.6.2
 -Eddie Harris-Lee fixed a problem with the time-dependent excited charge for the

@@ -67,7 +67,7 @@ if (mp_mpi) then
 ! Track DFT+DMFT iteraction if using mixing from file
   if (mixsave) then
     write(60,*)
-    write(60,'("Loop number : ",I0)') iscl
+    write(60,'("Loop number : ",I0)') iscl0
   end if
   write(60,*)
   write(60,'("Previous Kohn-Sham Fermi energy : ",G18.10)') efermi
@@ -131,7 +131,7 @@ if (mp_mpi) then
   call writestate
 ! save mixing and increase iteration counter  
   if (mixsave) then 
-    iscl = iscl + 1
+    iscl = iscl0 + 1
     call writemix(nwork,work)
   end if
 ! output DFT+DMFT energy components. (Total energy not used in convergence criteria)
